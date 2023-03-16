@@ -9,6 +9,7 @@ PARENT_DIR="$(cd .. && dirname "$(pwd)")"
 PYTHON3_PACK_NAME="python3"
 APT_PACKAGES="python3-venv python3-dev python3-pip mariadb-server libmariadb-dev-compat libmariadb-dev libssl-dev memcached libmemcached-tools rsyslog ksystemlog"
 DATABASE_NAME="jftf_cmdb"
+MOCK_DATABASE_NAME="test_jftf_cmdb"
 DATABASE_USER="jftf_dev"
 DATABASE_PASSWORD="jftf_dev"
 export DJANGO_SUPERUSER_USERNAME="jftf_dev"
@@ -92,6 +93,7 @@ function configure_database(){
     exit 1;
   fi
   sudo mariadb -e "GRANT ALL ON $DATABASE_NAME.* TO $DATABASE_USER@localhost IDENTIFIED BY '$DATABASE_PASSWORD' WITH GRANT OPTION;";
+  sudo mariadb -e "GRANT ALL ON $MOCK_DATABASE_NAME.* TO $DATABASE_USER@localhost IDENTIFIED BY '$DATABASE_PASSWORD' WITH GRANT OPTION;";
   if [ $? ]; then
     echo "JFTF development user granted development database permissions!";
   else
