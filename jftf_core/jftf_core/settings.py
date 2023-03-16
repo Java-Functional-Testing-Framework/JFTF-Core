@@ -38,6 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'allauth',
 ]
 
 MIDDLEWARE = [
@@ -159,3 +163,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication backends
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Social account OAuth2 providers and various authentication configuration parameters
+
+ACCOUNT_EMAIL_REQUIRED = True
+LOGIN_URL = '/api/auth/login/'
+LOGIN_REDIRECT_URL = '/'
+
+REST_AUTH = {
+    'SESSION_LOGIN': True,
+    'USE_JWT': False,
+}
