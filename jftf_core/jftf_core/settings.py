@@ -185,3 +185,9 @@ REST_AUTH = {
     'SESSION_LOGIN': True,
     'USE_JWT': False,
 }
+
+# Django REST Framework settings
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
