@@ -138,6 +138,12 @@ function apply_migrations(){
   fi
 }
 
+function init_legacy_jftf_cmdb_db_views(){
+  cd legacy_dbdriver || exit 1;
+  sudo ./db_views_init.sh $DATABASE_PASSWORD localhost;
+  cd .. || exit;
+}
+
 function create_superuser(){
   echo "Creating Django superuser";
   python3 "$MANAGE_PY_PATH" createsuperuser --noinput --email "$DJANGO_SUPERUSER_EMAIL";
@@ -156,7 +162,7 @@ do
     read -r -p 'Do you want to start the setup process? Y(y)/N(n) ' choice
     case "$choice" in
       n|N) break;;
-      y|Y) echo; install_apt_dependencies; echo; generate_python_venv; echo; install_pip_dependencies; echo; configure_database; echo; apply_migrations; echo; create_superuser; break; configure_rsyslog_remote_logging; break;;
+      y|Y) echo; install_apt_dependencies; echo; generate_python_venv; echo; install_pip_dependencies; echo; configure_database; echo; apply_migrations; echo; init_legacy_jftf_cmdb_db_views; echo; create_superuser; break; configure_rsyslog_remote_logging; break;;
       *) echo 'Response not valid';;
     esac
 done

@@ -1,7 +1,7 @@
-Django==4.1.7
+Django==4.2
 sqlparse==0.4.2
 djangorestframework==3.14.0
-mysqlclient==2.1.0
+mysqlclient==2.1.1
 pymemcache==3.5.2
 fastapi==0.89.1
 django-allauth==0.52.0
