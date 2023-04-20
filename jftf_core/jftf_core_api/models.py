@@ -1,7 +1,7 @@
 from django.db import models
 
 
-# Metaclass added for each model for old JftfDetachedRunner compatibility
+# Metaclass added for each model for legacy JftfDetachedRunner compatibility
 class TestCaseMetadata(models.Model):
     metadataId = models.AutoField(primary_key=True)
     testName = models.CharField(max_length=255)
