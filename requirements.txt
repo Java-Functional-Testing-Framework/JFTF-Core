@@ -7,3 +7,4 @@ fastapi==0.89.1
 django-allauth==0.52.0
 dj-rest-auth==3.0.0
 drf-spectacular==0.26.0
+django-extensions==3.2.1
