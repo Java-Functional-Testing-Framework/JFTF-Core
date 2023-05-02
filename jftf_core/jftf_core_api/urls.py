@@ -2,10 +2,10 @@ from django.urls import path, include
 from django.conf import settings
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
-from .views import TestCaseMetadataRegistrationViewSet
+from .views import TestCaseMetadataModelViewSet
 
 api_router = DefaultRouter()
-api_router.register(r'test-case-metadata', TestCaseMetadataRegistrationViewSet, basename='test-case-metadata')
+api_router.register(r'test-case-metadata', TestCaseMetadataModelViewSet, basename='test-case-metadata')
 
 urlpatterns = [
     path('auth/', include('allauth.urls')),

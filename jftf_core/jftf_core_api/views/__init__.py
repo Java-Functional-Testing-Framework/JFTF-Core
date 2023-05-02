@@ -1,1 +1,1 @@
-from .test_case_registration import TestCaseMetadataRegistrationViewSet
+from .test_case_metadata import TestCaseMetadataModelViewSet

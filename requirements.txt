@@ -9,3 +9,4 @@ dj-rest-auth==3.0.0
 drf-spectacular==0.26.0
 django-extensions==3.2.1
 drf-api-logger==1.1.12
+django-filter==23.2
