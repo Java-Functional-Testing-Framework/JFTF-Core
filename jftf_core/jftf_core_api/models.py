@@ -14,7 +14,7 @@ class TestCaseMetadata(models.Model):
         db_table = "TestCaseMetadata"
 
 
-class TestCases(models.Model):
+class TestCase(models.Model):
     testId = models.AutoField(primary_key=True)
     metaDataId = models.ForeignKey(TestCaseMetadata, on_delete=models.CASCADE, db_column="metaDataId")
     firstExecution = models.DateTimeField(null=True, blank=True)
@@ -27,7 +27,7 @@ class TestCases(models.Model):
 
 class TestReportInformation(models.Model):
     testReportInformationId = models.AutoField(primary_key=True)
-    testId = models.ForeignKey(TestCases, on_delete=models.CASCADE, db_column="testId")
+    testId = models.ForeignKey(TestCase, on_delete=models.CASCADE, db_column="testId")
     startupTimestamp = models.DateTimeField(auto_now_add=True)
     endTimestamp = models.DateTimeField(auto_now_add=True)
     testDuration = models.TimeField()
@@ -41,7 +41,7 @@ class TestReportInformation(models.Model):
 
 class TestReports(models.Model):
     reportId = models.AutoField(primary_key=True)
-    testId = models.ForeignKey(TestCases, on_delete=models.CASCADE, db_column="testId")
+    testId = models.ForeignKey(TestCase, on_delete=models.CASCADE, db_column="testId")
     testReportInformationId = models.ForeignKey(TestReportInformation, on_delete=models.CASCADE,
                                                 db_column="testReportInformationId")
 

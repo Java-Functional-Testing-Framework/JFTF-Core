@@ -1,6 +1,6 @@
-from rest_framework import serializers
-from .models import TestCaseMetadata
 from re import match
+from rest_framework import serializers
+from .models import TestCaseMetadata, TestCase
 
 
 class TestCaseMetadataSerializer(serializers.ModelSerializer):
@@ -40,3 +40,9 @@ class TestCaseMetadataSerializer(serializers.ModelSerializer):
                 "The test group and(/)or test name in the test path do not correspond with the provided values")
 
         return data
+
+
+class TestCaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestCase
+        fields = '__all__'
