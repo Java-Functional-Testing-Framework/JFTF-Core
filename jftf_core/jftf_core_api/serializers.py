@@ -43,6 +43,20 @@ class TestCaseMetadataSerializer(serializers.ModelSerializer):
 
 
 class TestCaseSerializer(serializers.ModelSerializer):
+    metaData = serializers.SerializerMethodField()
+
     class Meta:
         model = TestCase
         fields = '__all__'
+
+    def validate(self, data):
+        # Check if there are any other test cases with the same metadata id and name
+        queryset = TestCase.objects.filter(metaDataId=data['metaDataId'])
+        if queryset.exists():
+            raise serializers.ValidationError('A test case with this metadata id and name already exists.')
+
+        return data
+
+    def get_metaData(self, obj):
+        metaData = obj.metaDataId
+        return TestCaseMetadataSerializer(metaData).data
