@@ -87,7 +87,7 @@ class TestCaseMetadataAPITestCase(APITestCase):
                          'The test group and(/)or test name in the test path do not correspond with the '
                          'provided values')
 
-    def test_api_metadata_creation(self):
+    def test_api_metadata_registration(self):
         self.Test_create_test_case_metadata()
         self.Test_create_test_case_metadata_duplicate_entry()
         self.Test_create_test_case_metadata_invalid_test_path()
