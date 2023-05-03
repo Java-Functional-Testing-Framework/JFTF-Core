@@ -50,10 +50,18 @@ class TestCaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        # Check if there are any other test cases with the same metadata id and name
-        queryset = TestCase.objects.filter(metaDataId=data['metaDataId'])
-        if queryset.exists():
-            raise serializers.ValidationError('A test case with this metadata id and name already exists.')
+        if self.instance is not None:
+            # In case of a PUT method, instance already exists, it is the current TestCase entry,
+            # so exclude in the filter the current testId
+            # however, still check against other metadataId linked to other TestCase entries
+            queryset = TestCase.objects.filter(metaDataId=data['metaDataId']).exclude(testId=self.instance.testId)
+            if queryset.exists():
+                raise serializers.ValidationError('A test case with this metadata id and name already exists.')
+        else:
+            # Check if there are any other test cases with the same metadata id and name
+            queryset = TestCase.objects.filter(metaDataId=data['metaDataId'])
+            if queryset.exists():
+                raise serializers.ValidationError('A test case with this metadata id and name already exists.')
 
         return data
 
