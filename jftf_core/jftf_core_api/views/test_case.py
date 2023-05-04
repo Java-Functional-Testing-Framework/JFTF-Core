@@ -1,11 +1,10 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import TestCase
 from ..serializers import TestCaseSerializer
 
 
-class TestCaseModelViewSet(LoginRequiredMixin, viewsets.ModelViewSet):
+class TestCaseModelViewSet(viewsets.ModelViewSet):
     """
     ModelViewSet for CRUD operations on TestCase objects.
     """
