@@ -3,11 +3,12 @@ from django.conf import settings
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
-from .views import TestCaseMetadataModelViewSet, TestCaseModelViewSet
+from .views import TestCaseMetadataModelViewSet, TestCaseModelViewSet, TestCaseAdminModelViewSet
 
 api_router = DefaultRouter()
 api_router.register(r'test-case-metadata', TestCaseMetadataModelViewSet, basename='test-case-metadata')
 api_router.register(r'test-case', TestCaseModelViewSet, basename='test-case')
+api_router.register(r'test-case-admin', TestCaseAdminModelViewSet, basename='test-case-admin')
 
 urlpatterns = [
     path('token-auth/', views.obtain_auth_token),

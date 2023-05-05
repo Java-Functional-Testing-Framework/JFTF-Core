@@ -1,2 +1,2 @@
 from .test_case_metadata import TestCaseMetadataModelViewSet
-from .test_case import TestCaseModelViewSet
+from .test_case import TestCaseModelViewSet, TestCaseAdminModelViewSet

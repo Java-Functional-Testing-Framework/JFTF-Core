@@ -68,3 +68,16 @@ class TestCaseSerializer(serializers.ModelSerializer):
     def get_metaData(self, obj):
         metaData = obj.metaDataId
         return TestCaseMetadataSerializer(metaData).data
+
+
+class TestCaseAdminSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='testId')
+    metaData = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestCase
+        fields = ['id', 'firstExecution', 'lastExecution', 'executed', 'metaData']
+
+    def get_metaData(self, obj):
+        metaData = obj.metaDataId
+        return TestCaseMetadataSerializer(metaData).data
