@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'jftf_core_api',
-    'jftf_core_app',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
