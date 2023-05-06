@@ -91,7 +91,7 @@ class TestCaseAPITestCase(APITestCase):
     def Test_test_case_metadata_cascade_delete_check_on_test_case_object(self):
         self.test_logger.info("Verifying if test case metadata entry is cascade deleted upon deleting linked "
                               "test case metadata entry")
-        latest_test_case_id = TestCases.objects.latest("testId").testId
+        latest_test_case_id = TestCases.objects.last().pk
         delete_test_case_url = f"{self.test_case_api_url}{latest_test_case_id}/"
         self.test_logger.info(delete_test_case_url)
         response = self.client.delete(delete_test_case_url)
