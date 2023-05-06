@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
 ]
 
-ROOT_URLCONF = 'jftf_core_app.urls'
+ROOT_URLCONF = 'jftf_core.urls'
 
 TEMPLATES = [
     {
