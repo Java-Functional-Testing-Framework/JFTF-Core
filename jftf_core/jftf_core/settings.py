@@ -218,5 +218,7 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
     'range',
+]
+CORS_EXPOSE_HEADERS = [
     'content-range',
 ]
