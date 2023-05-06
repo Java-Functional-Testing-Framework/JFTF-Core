@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
-from ..models import TestCaseMetadata, TestCase
+from ..models import TestCaseMetadata, TestCases
 
 
 class TestCaseAPITestCase(APITestCase):
@@ -49,8 +49,8 @@ class TestCaseAPITestCase(APITestCase):
 
         self.test_logger.info(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(TestCase.objects.count(), 1)
-        self.assertEqual(TestCase.objects.get().metaDataId_id, self.metadataId)
+        self.assertEqual(TestCases.objects.count(), 1)
+        self.assertEqual(TestCases.objects.get().metaDataId_id, self.metadataId)
 
     def Test_test_case_duplicate_metadata_registration(self):
         self.test_logger.info("Attempting test case duplicate test case metadata registration for "
@@ -59,7 +59,7 @@ class TestCaseAPITestCase(APITestCase):
 
         self.test_logger.info(response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(TestCase.objects.count(), 1)
+        self.assertEqual(TestCases.objects.count(), 1)
         self.assertIn('non_field_errors', response.data.keys())
         self.assertEqual(response.data['non_field_errors'][0],
                          'A test case with this metadata id and name already exists.')
@@ -73,7 +73,7 @@ class TestCaseAPITestCase(APITestCase):
 
         self.test_logger.info(response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(TestCase.objects.count(), 1)
+        self.assertEqual(TestCases.objects.count(), 1)
         self.assertIn('metaDataId', response.data.keys())
         self.assertEqual(response.data['metaDataId'][0],
                          'Invalid pk \"100\" - object does not exist.')
@@ -86,7 +86,19 @@ class TestCaseAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(TestCaseMetadata.objects.count(), 0)
-        self.assertEqual(TestCase.objects.count(), 0)
+        self.assertEqual(TestCases.objects.count(), 0)
+
+    def Test_test_case_metadata_cascade_delete_check_on_test_case_object(self):
+        self.test_logger.info("Verifying if test case metadata entry is cascade deleted upon deleting linked "
+                              "test case metadata entry")
+        latest_test_case_id = TestCases.objects.latest("testId").testId
+        delete_test_case_url = f"{self.test_case_api_url}{latest_test_case_id}/"
+        self.test_logger.info(delete_test_case_url)
+        response = self.client.delete(delete_test_case_url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(TestCaseMetadata.objects.count(), 0)
+        self.assertEqual(TestCases.objects.count(), 0)
 
     def test_api_test_case_registration(self):
         self._create_test_metadata_helper()
@@ -95,3 +107,6 @@ class TestCaseAPITestCase(APITestCase):
         self.Test_test_case_duplicate_metadata_registration()
         self.Test_test_case_invalid_test_case_metadata_pk()
         self.Test_test_case_cascade_delete_check()
+        self._create_test_metadata_helper()
+        self.Test_test_case_valid_registration()
+        self.Test_test_case_metadata_cascade_delete_check_on_test_case_object()

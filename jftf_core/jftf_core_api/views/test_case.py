@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import ContentRangeHeaderPagination
-from ..models import TestCase
+from ..models import TestCases
 from ..serializers import TestCaseSerializer, TestCaseAdminSerializer
 
 
@@ -9,7 +9,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
     """
     ModelViewSet for CRUD operations on TestCase objects.
     """
-    queryset = TestCase.objects.all()
+    queryset = TestCases.objects.all()
     serializer_class = TestCaseSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
@@ -21,7 +21,7 @@ class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
     """
     ModelViewSet that provides responses compatible with React Admin.
     """
-    queryset = TestCase.objects.all()
+    queryset = TestCases.objects.all()
     serializer_class = TestCaseAdminSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]

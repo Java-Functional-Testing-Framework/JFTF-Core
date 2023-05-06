@@ -1,6 +1,6 @@
 from re import match
 from rest_framework import serializers
-from .models import TestCaseMetadata, TestCase
+from .models import TestCaseMetadata, TestCases
 
 
 class TestCaseMetadataSerializer(serializers.ModelSerializer):
@@ -46,7 +46,7 @@ class TestCaseSerializer(serializers.ModelSerializer):
     metaData = serializers.SerializerMethodField()
 
     class Meta:
-        model = TestCase
+        model = TestCases
         fields = '__all__'
 
     def validate(self, data):
@@ -54,12 +54,12 @@ class TestCaseSerializer(serializers.ModelSerializer):
             # In case of a PUT method, instance already exists, it is the current TestCase entry,
             # so exclude in the filter the current testId
             # however, still check against other metadataId linked to other TestCase entries
-            queryset = TestCase.objects.filter(metaDataId=data['metaDataId']).exclude(testId=self.instance.testId)
+            queryset = TestCases.objects.filter(metaDataId=data['metaDataId']).exclude(testId=self.instance.testId)
             if queryset.exists():
                 raise serializers.ValidationError('A test case with this metadata id and name already exists.')
         else:
             # Check if there are any other test cases with the same metadata id and name
-            queryset = TestCase.objects.filter(metaDataId=data['metaDataId'])
+            queryset = TestCases.objects.filter(metaDataId=data['metaDataId'])
             if queryset.exists():
                 raise serializers.ValidationError('A test case with this metadata id and name already exists.')
 
@@ -75,7 +75,7 @@ class TestCaseAdminSerializer(serializers.ModelSerializer):
     metaData = serializers.SerializerMethodField()
 
     class Meta:
-        model = TestCase
+        model = TestCases
         fields = ['id', 'firstExecution', 'lastExecution', 'executed', 'metaData']
 
     def get_metaData(self, obj):
