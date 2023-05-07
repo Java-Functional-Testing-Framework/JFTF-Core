@@ -19,7 +19,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
 
 class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
     """
-    ModelViewSet that provides responses compatible with React Admin.
+    ModelViewSet that provides responses compatible with React Admin for TestCase objects.
     """
     queryset = TestCases.objects.all()
     serializer_class = TestCaseAdminSerializer
@@ -27,4 +27,3 @@ class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['executed']
     pagination_class = ContentRangeHeaderPagination
-    

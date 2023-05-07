@@ -1,6 +1,6 @@
 from re import match
 from rest_framework import serializers
-from .models import TestCaseMetadata, TestCases
+from .models import TestCaseMetadata, TestCases, TestReportInformation
 
 
 class TestCaseMetadataSerializer(serializers.ModelSerializer):
@@ -81,3 +81,23 @@ class TestCaseAdminSerializer(serializers.ModelSerializer):
     def get_metaData(self, obj):
         metaData = obj.metaDataId
         return TestCaseMetadataSerializer(metaData).data
+
+
+class TestReportInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestReportInformation
+        fields = '__all__'
+
+    def validate(self, data):
+        startup_timestamp = data.get('startupTimestamp')
+        end_timestamp = data.get('endTimestamp')
+
+        if startup_timestamp and end_timestamp and end_timestamp < startup_timestamp:
+            raise serializers.ValidationError("End timestamp cannot be before the start timestamp.")
+
+        execution_result = data.get('executionResult')
+        if execution_result not in ['successfulState', 'errorState']:
+            raise serializers.ValidationError(
+                "Invalid value for executionResult. Only 'successfulState' and 'errorState' are allowed.")
+
+        return data

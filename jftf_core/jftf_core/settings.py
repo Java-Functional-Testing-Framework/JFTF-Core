@@ -203,7 +203,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
 }
 
-# CORS for RA Dev Server
+# CORS for React Admin JFTF-App
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True

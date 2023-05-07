@@ -1,2 +1,3 @@
 from .test_case_metadata import TestCaseMetadataModelViewSet
 from .test_case import TestCaseModelViewSet, TestCaseAdminModelViewSet
+from .test_report_information import TestReportInformationModelViewSet

@@ -34,8 +34,8 @@ class TestCases(models.Model):
 class TestReportInformation(models.Model):
     testReportInformationId = models.AutoField(primary_key=True)
     testId = models.ForeignKey(TestCases, on_delete=models.CASCADE, db_column="testId")
-    startupTimestamp = models.DateTimeField(auto_now_add=True)
-    endTimestamp = models.DateTimeField(auto_now_add=True)
+    startupTimestamp = models.DateTimeField(auto_now_add=False)
+    endTimestamp = models.DateTimeField(auto_now_add=False)
     testDuration = models.TimeField()
     errorMessages = models.TextField(null=True, blank=True)
     loggerOutput = models.TextField(null=True, blank=True)
