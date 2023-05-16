@@ -1,6 +1,6 @@
 from re import match
 from rest_framework import serializers
-from .models import TestCaseMetadata, TestCases, TestReportInformation
+from .models import TestCaseMetadata, TestCases, TestReportInformation, TestReports
 
 
 class TestCaseMetadataSerializer(serializers.ModelSerializer):
@@ -101,3 +101,27 @@ class TestReportInformationSerializer(serializers.ModelSerializer):
                 "Invalid value for executionResult. Only 'successfulState' and 'errorState' are allowed.")
 
         return data
+
+
+class TestReportSerializer(serializers.ModelSerializer):
+    testReportInformation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestReports
+        fields = ['reportId', 'testId', 'testReportInformationId', 'testReportInformation']
+
+    def validate(self, data):
+        test_id = data.get('testId')
+        test_report_info_id = data.get('testReportInformationId')
+
+        # Check if the testId in the linked testReportInformation object matches the current TestReports object testId
+        if test_id != test_report_info_id.testId:
+            raise serializers.ValidationError(
+                "The testId in the linked testReportInformation object must match the current TestReports object "
+                "testId.")
+
+        return data
+
+    def get_testReportInformation(self, obj):
+        testReportInformation = obj.testReportInformationId
+        return TestReportInformationSerializer(testReportInformation).data
