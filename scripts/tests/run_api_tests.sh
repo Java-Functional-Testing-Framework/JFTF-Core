@@ -7,4 +7,4 @@
 
 # Usage: ./run_api_tests.sh
 
-python3 ../../jftf_core/manage.py test jftf_core_api
+python3 ../../jftf_core/manage.py test jftf_core_api --keepdb
