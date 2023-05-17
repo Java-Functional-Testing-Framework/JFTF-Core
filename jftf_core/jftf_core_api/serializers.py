@@ -14,13 +14,6 @@ class TestCaseMetadataSerializer(serializers.ModelSerializer):
         test_path = data.get('testPath')
         test_name = data.get('testName')
 
-        existing_entry = TestCaseMetadata.objects.filter(testVersion=test_version, testPath=test_path,
-                                                         testName=test_name).exists()
-
-        if existing_entry:
-            raise serializers.ValidationError(
-                "Duplicate entry with the same test version, test path, and test name already exists")
-
         # Check if the test path is valid and formatted correctly
         valid_path_pattern = r'^\/home\/[\w-]+\/\.jftf\/test_cases\/([\w-]+)\/([\w-]+)\/lib\/\2\.jar$'
         re_match = match(valid_path_pattern, test_path)
@@ -38,6 +31,13 @@ class TestCaseMetadataSerializer(serializers.ModelSerializer):
         if data.get('testGroup') != path_test_group or data.get('testName') != path_test_name:
             raise serializers.ValidationError(
                 "The test group and(/)or test name in the test path do not correspond with the provided values")
+
+        existing_entry = TestCaseMetadata.objects.filter(testVersion=test_version, testPath=test_path,
+                                                         testName=test_name).exists()
+
+        if existing_entry:
+            raise serializers.ValidationError(
+                "Duplicate entry with the same test version, test path, and test name already exists")
 
         return data
 

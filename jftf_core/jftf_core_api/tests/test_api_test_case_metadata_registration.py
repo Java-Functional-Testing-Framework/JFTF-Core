@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from ..models import TestCaseMetadata
+from ..serializers import TestCaseMetadataSerializer
 from django.contrib.auth.models import User
 
 
@@ -92,3 +93,76 @@ class TestCaseMetadataAPITestCase(APITestCase):
         self.Test_create_test_case_metadata_duplicate_entry()
         self.Test_create_test_case_metadata_invalid_test_path()
         self.Test_create_test_case_metadata_invalid_test_group_and_test_name()
+
+    def test_check_registration_status_registered(self):
+        self.test_logger.info("Registered test case metadata response check for /check-registration-status/ endpoint")
+
+        # Create a test case metadata instance with the necessary fields
+        serializer = TestCaseMetadataSerializer(data=self.duplicate_metadata)
+
+        self.assertTrue(serializer.is_valid())
+
+        serializer.create(validated_data=self.duplicate_metadata)
+
+        # Send a POST request to the check-registration-status endpoint
+        url = reverse('test-case-metadata-check-registration-status')
+        response = self.client.post(url, self.duplicate_metadata)
+
+        # Assert the response status code
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the response data
+        expected_data = {
+            'is_registered': True,
+            'message': 'The test case is registered.',
+            'serializer_errors': {
+                'non_field_errors': [
+                    'Duplicate entry with the same test version, test path, and test name already exists'
+                ]
+            }
+        }
+        self.assertEqual(response.data, expected_data)
+
+    def test_check_registration_status_unregistered(self):
+        self.test_logger.info("Unregistered test case metadata response check for /check-registration-status/ endpoint")
+
+        # Send a POST request to the check-registration-status endpoint
+        url = reverse('test-case-metadata-check-registration-status')
+        response = self.client.post(url, self.duplicate_metadata)
+
+        # Assert the response status code
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the response data
+        expected_data = {
+            'is_registered': False,
+            'message': 'The test case is not registered.',
+            'serializer_errors': {}
+        }
+        self.assertEqual(response.data, expected_data)
+
+    def test_check_registration_status_inconclusive(self):
+        self.test_logger.info("Inconclusive test case metadata response check for /check-registration-status/ endpoint")
+
+        self.invalid_metadata = self.duplicate_metadata.copy()
+        self.invalid_metadata['testName'] = "test2"
+
+        # Send a POST request to the check-registration-status endpoint
+        url = reverse('test-case-metadata-check-registration-status')
+        response = self.client.post(url, self.invalid_metadata)
+        print(response.data)
+
+        # Assert the response status code
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the response data
+        expected_data = {
+            "is_registered": None,
+            "message": "Registration status is inconclusive.",
+            "serializer_errors": {
+                "non_field_errors": [
+                    "The test group and(/)or test name in the test path do not correspond with the provided values"
+                ]
+            }
+        }
+        self.assertEqual(response.data, expected_data)
