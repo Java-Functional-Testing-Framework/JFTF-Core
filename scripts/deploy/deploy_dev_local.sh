@@ -198,6 +198,7 @@ while true; do
     init_legacy_jftf_cmdb_db_views
     echo
     create_superuser
+    echo
     configure_rsyslog_remote_logging
     echo
     start_redis
