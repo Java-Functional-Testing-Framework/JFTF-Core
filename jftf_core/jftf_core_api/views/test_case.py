@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from django.conf import settings
 from ..tasks import execute_jftf_test_case
 from .pagination import ContentRangeHeaderPagination
 from ..models import TestCases
@@ -26,17 +27,32 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
         responses={
             200: {'description': 'Task ID of the executed TestCase', 'content': {
                 'application/json': {'schema': {'type': 'object', 'properties': {'task_id': {'type': 'string'}}}}}},
+            400: {'description': 'Bad request', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
             404: {'description': 'TestCase not found', 'content': {
                 'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
             500: {'description': 'Internal server error', 'content': {
                 'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}}
-        }
+        },
+        request={'application/json': {'schema': {'type': 'object', 'properties': {'runner': {'type': 'string'}}}}}
     )
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
         try:
+            # Check if the runner parameter is present in the request body
+            if 'runner' not in request.data:
+                return Response({'error': 'Missing "runner" parameter from JSON request body'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             # Retrieve the TestCase instance
             test_case = self.get_object()
+
+            # Get the runner from the request body
+            runner = request.data['runner']
+
+            # Check if the runner is valid
+            if runner not in settings.JFTF_AVAILABLE_RUNNERS:
+                return Response({'error': 'Invalid test runner'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Serialize the TestCase instance
             serializer = self.get_serializer(test_case)
@@ -49,7 +65,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
             jar_path = metaData_value['testPath']
 
             # Trigger the celery task
-            result = execute_jftf_test_case.delay(jar_path)
+            result = execute_jftf_test_case.delay(jar_path, runner)
 
             # Return the task ID or any other response as needed
             return Response({'task_id': result.id}, status=status.HTTP_200_OK)

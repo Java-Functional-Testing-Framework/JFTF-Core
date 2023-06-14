@@ -235,3 +235,9 @@ RABBITMQ_USERNAME = 'jftf'
 RABBITMQ_PASSWORD = 'jftf_development'
 
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@localhost:5672//'
+
+# JFTF related configuration
+
+JFTF_AVAILABLE_RUNNERS = [
+    'JftfDetachedRunner'
+]
