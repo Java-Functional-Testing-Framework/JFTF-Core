@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from ..tasks import execute_jftf_test_case
 from .pagination import ContentRangeHeaderPagination
 from ..models import TestCases
@@ -20,6 +21,17 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
     filterset_fields = ['executed']
     pagination_class = ContentRangeHeaderPagination
 
+    @extend_schema(
+        description='Execute the TestCase',
+        responses={
+            200: {'description': 'Task ID of the executed TestCase', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'task_id': {'type': 'string'}}}}}},
+            404: {'description': 'TestCase not found', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
+            500: {'description': 'Internal server error', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}}
+        }
+    )
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
         try:
