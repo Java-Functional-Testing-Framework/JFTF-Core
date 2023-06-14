@@ -7,7 +7,7 @@
 
 PARENT_DIR="$(cd .. && dirname "$(pwd)")"
 PYTHON3_PACK_NAME="python3"
-APT_PACKAGES="python3-venv python3-dev python3-pip mariadb-server libmariadb-dev-compat libmariadb-dev libssl-dev memcached libmemcached-tools rsyslog ksystemlog redis"
+APT_PACKAGES="python3-venv python3-dev python3-pip mariadb-server libmariadb-dev-compat libmariadb-dev libssl-dev memcached libmemcached-tools rsyslog ksystemlog rabbitmq-server"
 DATABASE_NAME="jftf_cmdb"
 MOCK_DATABASE_NAME="test_jftf_cmdb"
 DATABASE_USER="jftf"
@@ -15,6 +15,8 @@ DATABASE_PASSWORD="jftf_development"
 export DJANGO_SUPERUSER_USERNAME="jftf_dev"
 DJANGO_SUPERUSER_EMAIL="jftf_dev@jftf.com"
 export DJANGO_SUPERUSER_PASSWORD="jftf_dev"
+RABBITMQ_USER="jftf"
+RABBITMQ_PASSWORD="jftf_development"
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run the script as root!"
@@ -24,7 +26,7 @@ fi
 function install_apt_package() {
   echo "Checking installation of $1"
   if [ "$(dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -c "ok installed")" -eq 0 ]; then
-    apt-get install "$1"
+    apt-get install "$1" -y
   else
     echo "Package $1 already installed on the system!"
   fi
@@ -149,26 +151,25 @@ function create_superuser() {
   python3 "$MANAGE_PY_PATH" createsuperuser --noinput --email "$DJANGO_SUPERUSER_EMAIL"
 }
 
-function start_redis() {
-  echo "Enabling Redis service and starting KVS server"
-  # Start Redis service
-  sudo systemctl enable redis-server
+function enable_rabbitmq() {
+  echo "Enabling and starting RabbitMQ service"
 
-  # Check if Redis service is already running
-  if pgrep redis-server >/dev/null; then
-    echo "Redis is already running."
-    return 0
-  fi
+  # Enable RabbitMQ service
+  sudo systemctl enable rabbitmq-server
 
-  # Start Redis server
-  sudo systemctl start redis-server
+  # Start RabbitMQ service
+  sudo systemctl start rabbitmq-server
 
-  # Check if Redis service started successfully
-  if pgrep redis-server >/dev/null; then
-    echo "Redis started successfully."
-  else
-    echo "Failed to start Redis."
-  fi
+  # Check RabbitMQ service status
+  sudo systemctl status rabbitmq-server --no-pager
+}
+
+function configure_rabbitmq_user() {
+  echo "Configuring RabbitMQ JFTF administrator user"
+
+  sudo rabbitmqctl add_user $RABBITMQ_USER $RABBITMQ_PASSWORD
+  sudo rabbitmqctl set_user_tags $RABBITMQ_USER administrator
+  sudo rabbitmqctl set_permissions -p / jftf ".*" ".*" ".*"
 }
 
 echo
@@ -201,7 +202,9 @@ while true; do
     echo
     configure_rsyslog_remote_logging
     echo
-    start_redis
+    enable_rabbitmq
+    configure_rabbitmq_user
+    echo
     break
     ;;
   *) echo 'Response not valid' ;;

@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'drf_api_logger',
     'django_filters',
     'corsheaders',
+    'django_celery_results',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -222,3 +224,14 @@ CORS_ALLOW_HEADERS = [
 CORS_EXPOSE_HEADERS = [
     'content-range',
 ]
+
+# Celery settings
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'default'
+
+# RabbitMQ credentials
+RABBITMQ_USERNAME = 'jftf'
+RABBITMQ_PASSWORD = 'jftf_development'
+
+CELERY_BROKER_URL = f'amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@localhost:5672//'
