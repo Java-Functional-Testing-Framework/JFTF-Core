@@ -1,3 +1,3 @@
-from .celery import app as celery_app
+from .celery import app as jftf_celery_app
 
-__all__ = ('celery_app',)
+__all__ = ('jftf_celery_app',)
