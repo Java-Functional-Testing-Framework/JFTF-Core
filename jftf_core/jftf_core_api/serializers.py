@@ -1,6 +1,7 @@
 from re import match
 from rest_framework import serializers
 from .models import TestCaseMetadata, TestCases, TestReportInformation, TestReports
+from django_celery_results.models import TaskResult
 
 
 class TestCaseMetadataSerializer(serializers.ModelSerializer):
@@ -125,3 +126,9 @@ class TestReportSerializer(serializers.ModelSerializer):
     def get_testReportInformation(self, obj):
         testReportInformation = obj.testReportInformationId
         return TestReportInformationSerializer(testReportInformation).data
+
+
+class TaskResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskResult
+        fields = '__all__'
