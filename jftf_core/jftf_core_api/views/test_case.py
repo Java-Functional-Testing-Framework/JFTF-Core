@@ -19,7 +19,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
     serializer_class = TestCaseSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['executed']
+    filterset_fields = ['executed', 'metaDataId']
     pagination_class = ContentRangeHeaderPagination
 
     @extend_schema(
