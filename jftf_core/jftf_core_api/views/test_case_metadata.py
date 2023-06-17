@@ -28,7 +28,7 @@ class TestCaseMetadataModelViewSet(viewsets.ModelViewSet):
     serializer_class = TestCaseMetadataSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['testName', 'testGroup', 'featureGroup']
+    filterset_fields = ['testName', 'testGroup', 'featureGroup', 'testPath', 'testVersion']
     pagination_class = ContentRangeHeaderPagination
 
     @extend_schema(
