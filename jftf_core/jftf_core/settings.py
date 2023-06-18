@@ -247,6 +247,8 @@ JFTF_AVAILABLE_RUNNERS = [
     'JftfDetachedRunner'
 ]
 
+JFTF_CONFIGURATION_MANAGER = jftfXMLConfigManager
+
 CONSTANCE_BACKEND = 'constance.backends.memory.MemoryBackend'
 
 CONSTANCE_ADDITIONAL_FIELDS = {
