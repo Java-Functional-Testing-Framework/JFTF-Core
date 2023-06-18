@@ -1,6 +1,7 @@
 import os
 import logging
 from lxml import etree
+from pathlib import Path
 
 
 class XMLConfigManager:
@@ -207,3 +208,7 @@ class XMLConfigManager:
 
         self._save_xml_file(file_name, tree)
         self.logger.info(f"Configuration '{file_name}' has been updated.")
+
+
+jftfXMLConfigManager = XMLConfigManager(Path.home() / '.jftf' / 'config')
+jftfXMLConfigManager.check_integrity()

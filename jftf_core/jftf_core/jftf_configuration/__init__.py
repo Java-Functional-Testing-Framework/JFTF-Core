@@ -1,0 +1,1 @@
+from .jftf_configuration_manager import jftfXMLConfigManager

@@ -1,1 +1,0 @@
-from .jftf_configuration_manager import XMLConfigManager as jftfXMLConfigManager

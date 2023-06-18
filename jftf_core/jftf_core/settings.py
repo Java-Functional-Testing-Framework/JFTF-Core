@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from sys import stdout
+from .jftf_configuration import jftfXMLConfigManager
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'constance',
     'jftf_core_api',
     'rest_framework',
     'rest_framework.authtoken',
@@ -239,6 +241,132 @@ CELERY_BROKER_URL = f'amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@localhost:5
 
 # JFTF related configuration
 
+JFTF_BASE_PATH = Path.home() / '.jftf' / 'config'
+
 JFTF_AVAILABLE_RUNNERS = [
     'JftfDetachedRunner'
 ]
+
+CONSTANCE_BACKEND = 'constance.backends.memory.MemoryBackend'
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    'appender_select': ['django.forms.fields.ChoiceField', {
+        'widget': 'django.forms.Select',
+        'choices': (
+            ("consoleAppender", "consoleAppender"),
+            ("fileAppender", "fileAppender"),
+            ("syslogAppender", "syslogAppender"),
+            ("multiAppender", "multiAppender"),
+        )
+    }],
+    'log_level_select': ['django.forms.fields.ChoiceField', {
+        'widget': 'django.forms.Select',
+        'choices': (
+            ("DEBUG", "DEBUG"),
+            ("INFO", "INFO"),
+            ("ERROR", "ERROR"),
+        )
+    }],
+    'toggle_switch': ['django.forms.fields.ChoiceField', {
+        'widget': 'django.forms.Select',
+        'choices': (
+            ("true", "true"),
+            ("false", "false"),
+        )
+    }],
+}
+
+CONSTANCE_CONFIG = {
+    'ip': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_CMDB_CFG, "ip"),
+        f'IP Address of the database server (from {jftfXMLConfigManager.FILE_JFTF_CMDB_CFG})',
+    ),
+    'db_name': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_CMDB_CFG, "db_name"),
+        f'Name of the database (from {jftfXMLConfigManager.FILE_JFTF_CMDB_CFG})',
+    ),
+    'username': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_CMDB_CFG, "username"),
+        f'Username for database authentication (from {jftfXMLConfigManager.FILE_JFTF_CMDB_CFG})',
+    ),
+    'password': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_CMDB_CFG, "password"),
+        f'Password for database authentication (from {jftfXMLConfigManager.FILE_JFTF_CMDB_CFG})',
+    ),
+    'api_hostname': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG, "api_hostname"),
+        f'Hostname of the API server (from {jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG})',
+    ),
+    'api_port': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG, "api_port"),
+        f'Port number of the API server (from {jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG})',
+    ),
+    'api_username': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG, "api_username"),
+        f'Username for API authentication (from {jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG})',
+    ),
+    'api_password': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG, "api_password"),
+        f'Password for API authentication (from {jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG})',
+    ),
+    'enable_debug': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "enable_debug"),
+        f'Enable debugging (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'toggle_switch'
+    ),
+    'enable_logging': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "enable_logging"),
+        f'Enable logging (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'toggle_switch'
+    ),
+    'syslog_server_ip': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "syslog_server_ip"),
+        f'Syslog server IP address (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})',
+    ),
+    'daemon_app_id': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "daemon_app_id"),
+        f'Daemon application ID (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})',
+    ),
+    'daemon_log_level': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "daemon_log_level"),
+        f'Daemon log level (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'log_level_select'
+    ),
+    'daemon_appender': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "daemon_appender"),
+        f'Daemon appender (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'appender_select'
+    ),
+    'test_app_id': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "test_app_id"),
+        f'Test application ID (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})',
+    ),
+    'test_log_level': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "test_log_level"),
+        f'Test log level (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'log_level_select'
+    ),
+    'test_appender': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "test_appender"),
+        f'Test appender (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'appender_select'
+    ),
+    'control_app_id': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "control_app_id"),
+        f'Control application ID (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})',
+    ),
+    'control_log_level': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "control_log_level"),
+        f'Control log level (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'log_level_select'
+    ),
+    'control_appender': (
+        jftfXMLConfigManager.get_value(jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG, "control_appender"),
+        f'Control appender (from {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG})', 'appender_select'
+    ),
+    # Define other keys and descriptions in a similar manner
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    f'Configuration for {jftfXMLConfigManager.FILE_JFTF_DAEMON_CFG}': (
+        'api_hostname', 'api_port', 'api_username', 'api_password'),
+    f'Configuration for {jftfXMLConfigManager.FILE_JFTF_CMDB_CFG}': ('ip', 'db_name', 'username', 'password'),
+    f'Logger Configuration for {jftfXMLConfigManager.FILE_JFTF_LOGGER_CFG}': (
+        'enable_debug', 'enable_logging', 'syslog_server_ip', 'daemon_app_id', 'daemon_log_level',
+        'daemon_appender', 'test_app_id', 'test_log_level', 'test_appender', 'control_app_id',
+        'control_log_level', 'control_appender'
+    ),
+}
