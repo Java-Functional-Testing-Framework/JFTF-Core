@@ -20,7 +20,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['executed', 'metaDataId']
-    pagination_class = ContentRangeHeaderPagination
+    pagination_class = None
 
     @extend_schema(
         description='Execute the TestCase',

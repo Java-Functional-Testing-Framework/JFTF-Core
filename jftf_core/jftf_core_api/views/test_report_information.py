@@ -14,4 +14,4 @@ class TestReportInformationModelViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['testId', 'executionResult']
-    pagination_class = ContentRangeHeaderPagination
+    pagination_class = None

@@ -6,6 +6,9 @@ from .pagination import ContentRangeHeaderPagination
 
 
 class TaskResultViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ModelViewSet for CRUD operations on TaskResult objects.
+    """
     queryset = TaskResult.objects.all()
     serializer_class = TaskResultSerializer
     permission_classes = [permissions.IsAuthenticated]
