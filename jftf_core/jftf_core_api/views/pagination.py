@@ -3,6 +3,7 @@ from rest_framework.response import Response
 
 
 class ContentRangeHeaderPagination(PageNumberPagination):
+    page_size_query_param = 'perPage'
 
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
