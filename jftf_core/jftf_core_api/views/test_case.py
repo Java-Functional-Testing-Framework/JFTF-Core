@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from django.conf import settings
@@ -82,6 +83,7 @@ class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
     queryset = TestCases.objects.all()
     serializer_class = TestCaseAdminSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['executed']
+    ordering_fields = ['testId']
     pagination_class = ContentRangeHeaderPagination
