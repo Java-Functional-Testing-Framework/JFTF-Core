@@ -7,6 +7,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
+from django.utils import timezone
+from django_celery_results.models import TaskResult
 from . import jftf_celery_app
 
 
@@ -67,8 +69,32 @@ def send_failure_email(self, task_id, error_message, recipient_emails):
     subject = 'JFTF Test Application Execution Task Failed'
     template = 'email/test_execution_task_failure_email.html'
 
-    # Render the email template with the error message
-    email_body = render_to_string(template, {'error_message': error_message, 'task_id': task_id})
+    # Get the TaskResult object for the task_id
+    try:
+        task_result = TaskResult.objects.get(task_id=task_id)
+    except TaskResult.DoesNotExist:
+        return {'success': False, 'error_message': 'TaskResult not found'}
+
+    # Extract additional information from the task_result
+    worker_name = task_result.worker
+    task_args = task_result.task_args
+    created_at = task_result.date_created
+    completed_at = task_result.date_done
+    timezone_setting = timezone.get_current_timezone_name()
+
+    # Render the email template with the error message and additional information
+    email_body = render_to_string(
+        template,
+        {
+            'error_message': error_message,
+            'task_id': task_id,
+            'worker_name': worker_name,
+            'task_args': task_args,
+            'created_at': created_at,
+            'completed_at': completed_at,
+            'timezone_setting': timezone_setting,
+        }
+    )
 
     # Strip HTML tags from the message for the plain text version
     plain_message = strip_tags(email_body)
@@ -88,7 +114,8 @@ def send_failure_email(self, task_id, error_message, recipient_emails):
         'success': True,
         'recipients': recipient_emails,
         'error_message': error_message,
-        'test_execution_task_id': task_id
+        'test_execution_task_id': task_id,
+        'worker_name': worker_name
     }
 
     return response_data
