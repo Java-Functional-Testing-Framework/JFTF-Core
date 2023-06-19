@@ -211,4 +211,3 @@ class XMLConfigManager:
 
 
 jftfXMLConfigManager = XMLConfigManager(Path.home() / '.jftf' / 'config')
-jftfXMLConfigManager.check_integrity()

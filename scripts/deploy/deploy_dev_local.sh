@@ -12,21 +12,22 @@ DATABASE_NAME="jftf_cmdb"
 MOCK_DATABASE_NAME="test_jftf_cmdb"
 DATABASE_USER="jftf"
 DATABASE_PASSWORD="jftf_development"
+DATABASE_TIMEZONE="Europe/Bucharest"
 export DJANGO_SUPERUSER_USERNAME="jftf_dev"
 DJANGO_SUPERUSER_EMAIL="jftf_dev@jftf.com"
 export DJANGO_SUPERUSER_PASSWORD="jftf_dev"
 RABBITMQ_USER="jftf"
 RABBITMQ_PASSWORD="jftf_development"
 
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run the script as root!"
-  exit
+if [[ $EUID -eq 0 ]]; then
+  echo "This script cannot be executed as root. Please run it without root privileges."
+  exit 1
 fi
 
 function install_apt_package() {
   echo "Checking installation of $1"
   if [ "$(dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -c "ok installed")" -eq 0 ]; then
-    apt-get install "$1" -y
+    sudo apt-get install "$1" -y
   else
     echo "Package $1 already installed on the system!"
   fi
@@ -41,7 +42,7 @@ function generate_python_venv() {
     echo "Found Python venv, skipping generation step!"
   else
     echo "No Python venv found, generating..."
-    sudo -u "$SUDO_USER" python3 -m venv "$VENV_DIR"
+    python3 -m venv "$VENV_DIR"
   fi
   echo "Activating Python venv"
   if source "$VENV_DIR/bin/activate"; then
@@ -100,6 +101,13 @@ function configure_database() {
     echo "JFTF development user granted development database permissions!"
   else
     echo "Failed to grant JFTF development user development database permissions!"
+    exit 1
+  fi
+  sudo mariadb -e "SET GLOBAL time_zone = '$DATABASE_TIMEZONE';"
+  if [[ $(sudo mariadb -B -N -e "SELECT @@global.time_zone='$DATABASE_TIMEZONE';") == "1" ]]; then
+    echo "Global time zone is set to $DATABASE_TIMEZONE."
+  else
+    echo "Global time zone is not set to $DATABASE_TIMEZONE. Exiting..."
     exit 1
   fi
   sudo mariadb -e "FLUSH PRIVILEGES;"
@@ -183,7 +191,10 @@ echo
 while true; do
   read -r -p 'Do you want to start the setup process? Y(y)/N(n) ' choice
   case "$choice" in
-  n | N) break ;;
+  n | N)
+    exit 0
+    break
+    ;;
   y | Y)
     echo
     install_apt_dependencies
