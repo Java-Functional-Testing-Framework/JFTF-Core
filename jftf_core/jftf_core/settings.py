@@ -68,10 +68,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'jftf_core.urls'
 
+JFTF_CORE_TEMPLATES_DIR = Path("jftf_core") / Path("templates")
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [JFTF_CORE_TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -372,3 +374,19 @@ CONSTANCE_CONFIG_FIELDSETS = {
         'control_log_level', 'control_appender'
     ),
 }
+
+# Email SMTP configuration parameters
+
+JFTF_STATUS_EMAIL_ADDRESS = 'jftf.status@gmail.com'
+
+ENABLE_EMAILS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = JFTF_STATUS_EMAIL_ADDRESS
+EMAIL_HOST_PASSWORD = 'qcuejvmbbfqowizk'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+DEFAULT_FROM_EMAIL = JFTF_STATUS_EMAIL_ADDRESS
+SERVER_EMAIL = JFTF_STATUS_EMAIL_ADDRESS

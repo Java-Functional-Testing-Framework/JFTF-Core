@@ -1,6 +1,12 @@
 from celery import states
 from subprocess import Popen, PIPE
 from pathlib import Path
+from celery.signals import task_failure
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.html import strip_tags
 from . import jftf_celery_app
 
 
@@ -54,3 +60,47 @@ def execute_jftf_test_case(self, jar_path, testrunner):
         # Test case execution error
         self.update_state(state=states.FAILURE, meta={'status': 'ERROR', 'message': str(e)})
         raise ValueError(str(e))
+
+
+@jftf_celery_app.task(bind=True)
+def send_failure_email(self, task_id, error_message, recipient_emails):
+    subject = 'JFTF Test Application Execution Task Failed'
+    template = 'email/test_execution_task_failure_email.html'
+
+    # Render the email template with the error message
+    email_body = render_to_string(template, {'error_message': error_message, 'task_id': task_id})
+
+    # Strip HTML tags from the message for the plain text version
+    plain_message = strip_tags(email_body)
+
+    # Send the email
+    send_mail(
+        subject,
+        plain_message,
+        settings.EMAIL_HOST_USER,
+        recipient_emails,
+        html_message=email_body,
+        fail_silently=False,
+    )
+
+    # Create a success JSON response with the recipient list
+    response_data = {
+        'success': True,
+        'recipients': recipient_emails,
+        'error_message': error_message,
+        'test_execution_task_id': task_id
+    }
+
+    return response_data
+
+
+@task_failure.connect(sender=execute_jftf_test_case)
+def handle_task_failure(sender=None, task_id=None, exception=None, traceback=None, einfo=None, **kwargs):
+    # Extract the relevant information from the failure signal
+    error_message = str(exception)
+
+    # Get all user emails from the User model
+    recipient_emails = list(User.objects.values_list('email', flat=True))
+
+    # Execute the Celery task to send the failure email asynchronously
+    send_failure_email.delay(task_id, error_message, recipient_emails)
