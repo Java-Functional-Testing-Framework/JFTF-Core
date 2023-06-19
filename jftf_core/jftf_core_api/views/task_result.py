@@ -27,5 +27,5 @@ class TaskResultAdminViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['task_id']
-    ordering_fields = ['id']
+    ordering_fields = ['id', 'status']
     pagination_class = ContentRangeHeaderPagination
