@@ -1,5 +1,5 @@
 from .test_case_metadata import TestCaseMetadataModelViewSet
 from .test_case import TestCaseModelViewSet, TestCaseAdminModelViewSet
 from .test_report_information import TestReportInformationModelViewSet
-from .test_report import TestReportModelViewSet
+from .test_report import TestReportModelViewSet, TestReportAdminModelViewSet
 from .task_result import TaskResultViewSet, TaskResultAdminViewSet

@@ -1,6 +1,5 @@
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
-from .pagination import ContentRangeHeaderPagination
 from ..models import TestReportInformation
 from ..serializers import TestReportInformationSerializer
 
