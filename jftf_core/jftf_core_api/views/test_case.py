@@ -84,12 +84,15 @@ class TestCaseAdminOrderingFilter(FilterSet):
     ordering = OrderingFilter(
         fields=(
             ('testId', 'id'),
+            ('executed', 'executed'),
+            ('firstExecution', 'firstExecution'),
+            ('lastExecution', 'lastExecution'),
         )
     )
 
     class Meta:
         model = TestCases
-        fields = ['testId', ]
+        fields = ['testId', 'executed', 'firstExecution', 'lastExecution']
 
 
 class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
