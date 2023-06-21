@@ -1,5 +1,6 @@
 from celery import states, group
 from subprocess import Popen, PIPE
+from typing import List
 from pathlib import Path
 from celery.signals import task_failure
 from django.contrib.auth.models import User
@@ -25,10 +26,10 @@ class TestCaseApplicationExecutionError(Exception):
 
 
 class TestCaseApplicationGroupExecutionError(Exception):
-    def __init__(self, task_id):
-        self.task_id = task_id
+    def __init__(self, task_ids):
+        self.task_ids = task_ids
         super().__init__(
-            f"JFTF test application execution failed for task ID: '{task_id}'")
+            f"JFTF test application execution failed for task(s) with ID(s): '{task_ids}'")
 
 
 @jftf_celery_app.task(bind=True, trail=True)
@@ -71,11 +72,8 @@ def execute_jftf_test_case(self, jar_path, testrunner):
         raise ValueError(str(e))
 
 
-@jftf_celery_app.task(bind=True, trail=True)
-def send_failure_email(self, task_id, error_message, recipient_emails):
-    subject = 'JFTF Test Application Execution Task Failed'
-    template = 'email/test_execution_task_failure_email.html'
-
+def _send_task_failure_email_generic(subject: str, template: str, task_id: str, error_message: str,
+                                     recipient_emails: List[str]) -> dict:
     # Get the TaskResult object for the task_id
     try:
         task_result = TaskResult.objects.get(task_id=task_id)
@@ -129,6 +127,32 @@ def send_failure_email(self, task_id, error_message, recipient_emails):
 
 
 @jftf_celery_app.task(bind=True, trail=True)
+def send_failure_email(self, task_id, error_message, recipient_emails):
+    subject = 'JFTF Test Application Execution Task Failed'
+    template = 'email/test_execution_task_failure_email.html'
+
+    # Update task status to 'In Progress'
+    self.update_state(state=states.PENDING,
+                      meta={'status': states.PENDING,
+                            'message': 'Execution task failure email send is in progress'})
+
+    return _send_task_failure_email_generic(subject, template, task_id, error_message, recipient_emails)
+
+
+@jftf_celery_app.task(bind=True, trail=True)
+def send_failure_email_group_execution(self, task_id, error_message, recipient_emails):
+    subject = 'JFTF Test Application Execution Group Task Failed'
+    template = 'email/test_execution_group_task_failure_email.html'
+
+    # Update task status to 'In Progress'
+    self.update_state(state=states.PENDING,
+                      meta={'status': states.PENDING,
+                            'message': 'Group task execution failure email send is in progress'})
+
+    return _send_task_failure_email_generic(subject, template, task_id, error_message, recipient_emails)
+
+
+@jftf_celery_app.task(bind=True, trail=True)
 def execute_jftf_test_case_group(self, jar_paths, testrunner):
     # Create a group of individual tasks
     task_group = group(
@@ -152,14 +176,19 @@ def execute_jftf_test_case_group(self, jar_paths, testrunner):
             # so instead it has to be suppressed
             pass
 
+    failed_execution_tasks_ids = []
+
     # Check if any task in the group has failed
     for result in group_result.results:
         if result.failed():
-            # Update the task state to 'FAILURE' and raise the custom exception
-            self.update_state(state=states.FAILURE,
-                              meta={'status': states.FAILURE,
-                                    'message': 'JFTF test application group execution failed'})
-            raise TestCaseApplicationGroupExecutionError(result.id)
+            failed_execution_tasks_ids.append(result.id)
+
+    if len(failed_execution_tasks_ids) > 0:
+        # Update the task state to 'FAILURE' and raise the custom exception
+        self.update_state(state=states.FAILURE,
+                          meta={'status': states.FAILURE,
+                                'message': 'JFTF test application group execution failed'})
+        raise TestCaseApplicationGroupExecutionError(failed_execution_tasks_ids)
 
     # Retrieve relevant information from individual results
     result_info = []
@@ -172,7 +201,8 @@ def execute_jftf_test_case_group(self, jar_paths, testrunner):
         })
 
     # Return the group result and relevant information
-    return {'status': states.SUCCESS, 'individual_test_execution_results': result_info}
+    return {'status': states.SUCCESS, 'message': 'JFTF test applications executed successfully',
+            'individual_test_execution_results': result_info}
 
 
 @task_failure.connect(sender=execute_jftf_test_case)
@@ -185,3 +215,15 @@ def handle_task_failure(sender=None, task_id=None, exception=None, traceback=Non
 
     # Execute the Celery task to send the failure email asynchronously
     send_failure_email.delay(task_id, error_message, recipient_emails)
+
+
+@task_failure.connect(sender=execute_jftf_test_case_group)
+def handle_task_group_failure(sender=None, task_id=None, exception=None, traceback=None, einfo=None, **kwargs):
+    # Extract the relevant information from the failure signal
+    error_message = str(exception)
+
+    # Get all user emails from the User model
+    recipient_emails = list(User.objects.values_list('email', flat=True))
+
+    # Execute the Celery task to send the failure email asynchronously
+    send_failure_email_group_execution.delay(task_id, error_message, recipient_emails)
