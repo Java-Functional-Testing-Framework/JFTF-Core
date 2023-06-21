@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from django_filters.filters import OrderingFilter, CharFilter
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from .pagination import ContentRangeHeaderPagination
 from ..models import TestReports
 from ..serializers import TestReportSerializer, TestReportAdminSerializer
@@ -65,7 +66,8 @@ class TestReportAdminModelViewSet(viewsets.ModelViewSet):
     queryset = TestReports.objects.all()
     serializer_class = TestReportAdminSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = [DjangoFilterBackend, SearchFilter, ]
     filterset_fields = ['reportId', 'testId', 'testReportInformationId']
     filterset_class = TestReportAdminOrderingFilter
+    search_fields = ['testId__metaDataId__testName', 'testReportInformationId__executionResult']
     pagination_class = ContentRangeHeaderPagination

@@ -5,6 +5,7 @@ from rest_framework import status
 from django_filters.filters import OrderingFilter, CharFilter
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from drf_spectacular.utils import extend_schema
 from django.conf import settings
 from ..tasks import execute_jftf_test_case
@@ -102,7 +103,8 @@ class TestCaseAdminModelViewSet(viewsets.ModelViewSet):
     queryset = TestCases.objects.all()
     serializer_class = TestCaseAdminSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = [DjangoFilterBackend, SearchFilter, ]
     filterset_fields = ['executed']
     filterset_class = TestCaseAdminOrderingFilter
+    search_fields = ['metaDataId__testName', 'metaDataId__testGroup', 'metaDataId__featureGroup']
     pagination_class = ContentRangeHeaderPagination
