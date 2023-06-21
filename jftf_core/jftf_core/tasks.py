@@ -1,4 +1,4 @@
-from celery import states
+from celery import states, group
 from subprocess import Popen, PIPE
 from pathlib import Path
 from celery.signals import task_failure
@@ -24,7 +24,14 @@ class TestCaseApplicationExecutionError(Exception):
         super().__init__(f"JFTF test application from: '{script_path}' failed to execute, STDERR is '{stderr}'")
 
 
-@jftf_celery_app.task(bind=True)
+class TestCaseApplicationGroupExecutionError(Exception):
+    def __init__(self, task_id):
+        self.task_id = task_id
+        super().__init__(
+            f"JFTF test application execution failed for task ID: '{task_id}'")
+
+
+@jftf_celery_app.task(bind=True, trail=True)
 def execute_jftf_test_case(self, jar_path, testrunner):
     # Extract the script path from the jar_path
     jftf_script_path = Path(jar_path).parent.parent / 'bin' / Path(jar_path).stem
@@ -64,7 +71,7 @@ def execute_jftf_test_case(self, jar_path, testrunner):
         raise ValueError(str(e))
 
 
-@jftf_celery_app.task(bind=True)
+@jftf_celery_app.task(bind=True, trail=True)
 def send_failure_email(self, task_id, error_message, recipient_emails):
     subject = 'JFTF Test Application Execution Task Failed'
     template = 'email/test_execution_task_failure_email.html'
@@ -119,6 +126,53 @@ def send_failure_email(self, task_id, error_message, recipient_emails):
     }
 
     return response_data
+
+
+@jftf_celery_app.task(bind=True, trail=True)
+def execute_jftf_test_case_group(self, jar_paths, testrunner):
+    # Create a group of individual tasks
+    task_group = group(
+        execute_jftf_test_case.s(jar_path, testrunner) for jar_path in jar_paths
+    )
+
+    # Update task status to 'In Progress'
+    self.update_state(state=states.PENDING,
+                      meta={'status': states.PENDING, 'message': 'JFTF test application group execution in progress'})
+
+    # Execute the group of tasks and get the group result
+    group_result = task_group.delay()
+
+    # Check the status of individual tasks in the group
+    while True:
+        try:
+            if all(result.ready() for result in group_result.results):
+                break
+        except Exception:
+            # Suppress exception thrown from group task (at ready() call), for some reason this cannot be stopped,
+            # so instead it has to be suppressed
+            pass
+
+    # Check if any task in the group has failed
+    for result in group_result.results:
+        if result.failed():
+            # Update the task state to 'FAILURE' and raise the custom exception
+            self.update_state(state=states.FAILURE,
+                              meta={'status': states.FAILURE,
+                                    'message': 'JFTF test application group execution failed'})
+            raise TestCaseApplicationGroupExecutionError(result.id)
+
+    # Retrieve relevant information from individual results
+    result_info = []
+    for result in group_result.results:
+        result_info.append({
+            'task_id': result.id,
+            'status': result.status,
+            'result': result.result,
+            'traceback': result.traceback,
+        })
+
+    # Return the group result and relevant information
+    return {'status': states.SUCCESS, 'individual_test_execution_results': result_info}
 
 
 @task_failure.connect(sender=execute_jftf_test_case)

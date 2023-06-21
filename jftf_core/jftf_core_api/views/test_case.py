@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from drf_spectacular.utils import extend_schema
 from django.conf import settings
-from ..tasks import execute_jftf_test_case
+from ..tasks import execute_jftf_test_case, execute_jftf_test_case_group
 from .pagination import ContentRangeHeaderPagination
 from ..models import TestCases
 from ..serializers import TestCaseSerializer, TestCaseAdminSerializer
@@ -74,6 +74,79 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
             return Response({'task_id': result.id}, status=status.HTTP_200_OK)
         except TestCases.DoesNotExist:
             return Response({'error': 'TestCase not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        description='Execute multiple TestCases',
+        responses={
+            200: {'description': 'Task group ID of the executed TestCases', 'content': {
+                'application/json': {
+                    'schema': {'type': 'object', 'properties': {'task_group_id': {'type': 'string'}}}}}},
+            400: {'description': 'Bad request', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
+            404: {'description': 'TestCases not found', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
+            500: {'description': 'Internal server error', 'content': {
+                'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}}
+        },
+        request={'application/json': {'schema': {'type': 'object', 'properties': {
+            'test_case_ids': {'type': 'array', 'items': {'type': 'integer'}}}}}}
+    )
+    @action(detail=False, methods=['post'])
+    def execute_multiple(self, request):
+        try:
+            # Check if the runner parameter is present in the request body
+            if 'runner' not in request.data:
+                return Response({'error': 'Missing "runner" parameter from JSON request body'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if the test_case_ids parameter is present in the request body
+            if 'test_case_ids' not in request.data:
+                return Response({'error': 'Missing "test_case_ids" parameter from JSON request body'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Get the test_case_ids from the request body
+            test_case_ids = request.data['test_case_ids']
+
+            # Get the runner from the request body
+            runner = request.data['runner']
+
+            # Check if the runner is valid
+            if runner not in settings.JFTF_AVAILABLE_RUNNERS:
+                return Response({'error': 'Invalid test runner'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Sanitize the test case IDs and check if they exist
+            test_cases = []
+            for test_case_id in test_case_ids:
+                try:
+                    test_case = TestCases.objects.get(testId=test_case_id)
+                    test_cases.append(test_case)
+                except TestCases.DoesNotExist:
+                    return Response({'error': f'TestCase with ID {test_case_id} does not exist'},
+                                    status=status.HTTP_404_NOT_FOUND)
+
+            # Create a list to store the jar paths
+            jar_paths = []
+
+            # Retrieve metadata and jar path for each test case
+            for test_case in test_cases:
+                # Serialize the TestCase instance
+                serializer = self.get_serializer(test_case)
+                serialized_data = serializer.data
+
+                # Access the metaData field value from the serialized data
+                metaData_value = serialized_data['metaData']
+
+                # Get the jar path from the metaData serialized data
+                jar_path = metaData_value['testPath']
+                jar_paths.append(jar_path)
+
+            # Build the group task for executing test cases
+            group_execute_task = execute_jftf_test_case_group.delay(jar_paths, runner)
+
+            # Return the group task ID or any other response as needed
+            return Response({'task_group_id': group_execute_task.id}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

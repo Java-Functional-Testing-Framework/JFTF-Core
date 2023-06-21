@@ -1,1 +1,2 @@
 from jftf_core.tasks import execute_jftf_test_case as execute_jftf_test_case
+from jftf_core.tasks import execute_jftf_test_case_group as execute_jftf_test_case_group
