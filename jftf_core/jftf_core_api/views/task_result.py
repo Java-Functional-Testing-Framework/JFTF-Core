@@ -28,5 +28,5 @@ class TaskResultAdminViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter, ]
     filterset_fields = ['task_id']
     ordering_fields = ['id', 'status', 'date_created', 'date_done']
-    search_fields = ['status']
+    search_fields = ['status', 'task_id']
     pagination_class = ContentRangeHeaderPagination
