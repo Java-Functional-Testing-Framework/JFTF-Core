@@ -1,11 +1,15 @@
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from django.template import loader
+from django.http import FileResponse
 from django_filters.filters import OrderingFilter, CharFilter
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from drf_spectacular.utils import extend_schema
 from .pagination import ContentRangeHeaderPagination
-from ..models import TestReports
-from ..serializers import TestReportSerializer, TestReportAdminSerializer
+from ..models import TestReports, TestCases
+from ..serializers import TestReportSerializer, TestReportAdminSerializer, TestCaseSerializer
 
 
 class TestReportModelViewSet(viewsets.ModelViewSet):
@@ -18,6 +22,53 @@ class TestReportModelViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['reportId', 'testId', 'testReportInformationId']
     pagination_class = None
+
+    @extend_schema(
+        description='Generate a test report',
+        responses={
+            200: {
+                'description': 'Test report file',
+                'content': {
+                    'text/html': {}
+                }
+            }
+        }
+    )
+    @action(detail=True, methods=['get'])
+    def generate_report(self, request, pk=None):
+        # Retrieve the test report object
+        test_report = self.get_object()
+
+        # Serialize the test report object
+        serializer = self.get_serializer(test_report)
+        serialized_data = serializer.data
+
+        # Get the test report information from the serialized data
+        test_report_information = serialized_data['testReportInformation']
+
+        # Retrieve the associated test object
+        test_id = test_report_information['testId']
+        test = TestCases.objects.get(pk=test_id)
+
+        # Serialize the test object
+        test_serializer = TestCaseSerializer(test)
+        test_metadata = test_serializer.data['metaData']
+
+        # Render the test report template
+        template = loader.get_template('report/test_report_dark_theme.html')
+        context = {
+            'test_report_information': test_report_information,
+            'test_metadata': test_metadata
+        }
+        rendered_report = template.render(context)
+
+        # Generate and return the report file
+        response = FileResponse(
+            rendered_report,
+            content_type='text/html'
+        )
+        response['Content-Disposition'] = f'attachment; filename=test_report_{test_metadata["testName"]}_Id_{pk}.html'
+        return response
 
 
 class TestReportAdminOrderingFilter(FilterSet):

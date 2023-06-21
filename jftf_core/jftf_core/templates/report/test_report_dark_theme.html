@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Java Functional Testing Framework Test Application Execution Report</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #6600cc;
+            font-size: 24px;
+        }
+
+        .section {
+            background-color: #333;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .section th, .section td {
+            padding: 10px;
+            border: 1px solid #666;
+        }
+
+        .section th {
+            background-color: #444;
+            font-weight: bold;
+        }
+
+        .text-box {
+            background-color: #555;
+            color: #fff;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .text-box.collapsed {
+            max-height: 100px;
+            overflow-y: scroll;
+        }
+
+        .text-box.expandable {
+            cursor: pointer;
+        }
+
+        .highlight {
+            color: #000;
+            background-color: #ccc;
+            padding: 2px;
+            border-radius: 2px;
+        }
+
+        .highlight.errorState {
+            background-color: #ff0000;
+        }
+
+        .highlight.successfulState {
+            background-color: #00ff00;
+        }
+
+        .banner {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .banner img {
+            max-width: 50%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="banner">
+    <img src="https://user-images.githubusercontent.com/57295704/236533056-031a99b6-4adf-4d97-b71b-9570bccd7e37.png"
+         alt="JFTF Email Banner">
+</div>
+
+<h1>Java Functional Testing Framework Test Application Execution Report</h1>
+
+<div class="section">
+    <h2>Test Metadata</h2>
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Test Name:</td>
+            <td><span class="highlight">{{ test_metadata.testName }}</span></td>
+        </tr>
+        <tr>
+            <td>Feature Group:</td>
+            <td><span class="highlight">{{ test_metadata.featureGroup }}</span></td>
+        </tr>
+        <tr>
+            <td>Test Group:</td>
+            <td><span class="highlight">{{ test_metadata.testGroup }}</span></td>
+        </tr>
+        <tr>
+            <td>Test Path:</td>
+            <td><span class="highlight">{{ test_metadata.testPath }}</span></td>
+        </tr>
+        <tr>
+            <td>Test Version:</td>
+            <td><span class="highlight">{{ test_metadata.testVersion }}</span></td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>Test Report Information</h2>
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Startup Timestamp:</td>
+            <td><span class="highlight">{{ test_report_information.startupTimestamp }}</span></td>
+        </tr>
+        <tr>
+            <td>End Timestamp:</td>
+            <td><span class="highlight">{{ test_report_information.endTimestamp }}</span></td>
+        </tr>
+        <tr>
+            <td>Test Duration:</td>
+            <td><span class="highlight">{{ test_report_information.testDuration }}</span></td>
+        </tr>
+        <tr>
+            <td>Error Messages:</td>
+            <td>
+                <div id="error-messages" class="text-box expandable collapsed"
+                     onclick="toggleTextBox('error-messages')">
+                    <pre>{{ test_report_information.errorMessages }}</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>Logger Output:</td>
+            <td>
+                <div id="logger-output" class="text-box expandable collapsed" onclick="toggleTextBox('logger-output')">
+                    <pre>{{ test_report_information.loggerOutput }}</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>Execution Result:</td>
+            <td>
+                <span class="highlight" id="execution-result">{{ test_report_information.executionResult }}</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    function toggleTextBox(elementId) {
+        const textBox = document.getElementById(elementId);
+        textBox.classList.toggle("collapsed");
+    }
+
+    // Dynamically set the highlight color for Execution Result
+    const executionResultElement = document.getElementById("execution-result");
+    const executionResult = "{{ test_report_information.executionResult }}";
+    if (executionResult.toLowerCase() === "errorstate") {
+        executionResultElement.classList.add("errorState");
+    } else if (executionResult.toLowerCase() === "successfulstate") {
+        executionResultElement.classList.add("successfulState");
+    }
+</script>
+</body>
+</html>
