@@ -20,18 +20,42 @@ class TestReportModelViewSet(viewsets.ModelViewSet):
 
 
 class TestReportAdminOrderingFilter(FilterSet):
-    id = CharFilter()
+    id = CharFilter(field_name='reportId')
+    testReportInformationId__startTimestamp = CharFilter(
+        field_name='testReportInformationId__startupTimestamp',
+        label='Start Timestamp',
+        lookup_expr='icontains'
+    )
+    testReportInformationId__endTimestamp = CharFilter(
+        field_name='testReportInformationId__endTimestamp',
+        label='End Timestamp',
+        lookup_expr='icontains'
+    )
+    testReportInformationId__executionResult = CharFilter(
+        field_name='testReportInformationId__executionResult',
+        label='Execution Result',
+        lookup_expr='icontains'
+    )
+    testReportInformationId__testDuration = CharFilter(
+        field_name='testReportInformationId__testDuration',
+        label='Test Duration',
+        lookup_expr='icontains'
+    )
 
     order_by_field = 'ordering'
     ordering = OrderingFilter(
         fields=(
             ('reportId', 'id'),
+            ('testReportInformationId__startupTimestamp', 'testReportInformation.startupTimestamp'),
+            ('testReportInformationId__endTimestamp', 'testReportInformation.endTimestamp'),
+            ('testReportInformationId__executionResult', 'testReportInformation.executionResult'),
+            ('testReportInformationId__testDuration', 'testReportInformation.testDuration')
         )
     )
 
     class Meta:
         model = TestReports
-        fields = ['reportId', ]
+        fields = ['reportId']
 
 
 class TestReportAdminModelViewSet(viewsets.ModelViewSet):

@@ -78,7 +78,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
 
 
 class TestCaseAdminOrderingFilter(FilterSet):
-    id = CharFilter()
+    id = CharFilter(field_name='testId')
 
     order_by_field = 'ordering'
     ordering = OrderingFilter(
