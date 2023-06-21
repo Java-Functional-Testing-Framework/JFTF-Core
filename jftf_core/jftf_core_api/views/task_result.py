@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from django_celery_results.models import TaskResult
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from ..serializers import TaskResultSerializer
 from .pagination import ContentRangeHeaderPagination
@@ -25,7 +25,8 @@ class TaskResultAdminViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TaskResult.objects.all()
     serializer_class = TaskResultSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter, ]
     filterset_fields = ['task_id']
     ordering_fields = ['id', 'status', 'date_created', 'date_done']
+    search_fields = ['status']
     pagination_class = ContentRangeHeaderPagination
