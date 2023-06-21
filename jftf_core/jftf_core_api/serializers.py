@@ -128,6 +128,19 @@ class TestReportSerializer(serializers.ModelSerializer):
         return TestReportInformationSerializer(testReportInformation).data
 
 
+class TestReportAdminSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='reportId')
+    testReportInformation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestReports
+        fields = ['id', 'testId', 'testReportInformationId', 'testReportInformation']
+
+    def get_testReportInformation(self, obj):
+        testReportInformation = obj.testReportInformationId
+        return TestReportInformationSerializer(testReportInformation).data
+
+
 class TaskResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResult
