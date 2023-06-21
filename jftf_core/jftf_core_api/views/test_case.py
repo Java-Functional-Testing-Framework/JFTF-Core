@@ -82,7 +82,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
         responses={
             200: {'description': 'Task group ID of the executed TestCases', 'content': {
                 'application/json': {
-                    'schema': {'type': 'object', 'properties': {'task_group_id': {'type': 'string'}}}}}},
+                    'schema': {'type': 'object', 'properties': {'task_id': {'type': 'string'}}}}}},
             400: {'description': 'Bad request', 'content': {
                 'application/json': {'schema': {'type': 'object', 'properties': {'error': {'type': 'string'}}}}}},
             404: {'description': 'TestCases not found', 'content': {
@@ -146,7 +146,7 @@ class TestCaseModelViewSet(viewsets.ModelViewSet):
             group_execute_task = execute_jftf_test_case_group.delay(jar_paths, runner)
 
             # Return the group task ID or any other response as needed
-            return Response({'task_group_id': group_execute_task.id}, status=status.HTTP_200_OK)
+            return Response({'task_id': group_execute_task.id}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
