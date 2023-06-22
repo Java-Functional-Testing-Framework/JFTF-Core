@@ -68,7 +68,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'jftf_core.urls'
 
-JFTF_CORE_TEMPLATES_DIR = Path("jftf_core") / Path("templates")
+JFTF_CORE_TEMPLATES_DIR = BASE_DIR / Path("jftf_core") / Path("templates")
 
 TEMPLATES = [
     {
