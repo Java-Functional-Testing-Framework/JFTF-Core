@@ -227,6 +227,7 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_EXPOSE_HEADERS = [
     'content-range',
+    'content-disposition',
 ]
 
 # Celery settings
