@@ -21,6 +21,7 @@ urlpatterns = [
     path('token-auth/', views.obtain_auth_token),
     path('auth/', include('allauth.urls')),
     path('rest-auth/', include('dj_rest_auth.urls')),
+    path('rest-auth/signup/', include('dj_rest_auth.registration.urls')),
     path('', include(api_router.urls)),
 ]
 
