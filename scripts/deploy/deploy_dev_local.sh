@@ -12,7 +12,6 @@ DATABASE_NAME="jftf_cmdb"
 MOCK_DATABASE_NAME="test_jftf_cmdb"
 DATABASE_USER="jftf"
 DATABASE_PASSWORD="jftf_development"
-DATABASE_TIMEZONE="UTC"
 export DJANGO_SUPERUSER_USERNAME="jftf_dev"
 DJANGO_SUPERUSER_EMAIL="jftf_dev@jftf.com"
 export DJANGO_SUPERUSER_PASSWORD="jftf_dev"
@@ -101,13 +100,6 @@ function configure_database() {
     echo "JFTF development user granted development database permissions!"
   else
     echo "Failed to grant JFTF development user development database permissions!"
-    exit 1
-  fi
-  sudo mariadb -e "SET GLOBAL time_zone = '$DATABASE_TIMEZONE';"
-  if [[ $(sudo mariadb -B -N -e "SELECT @@global.time_zone='$DATABASE_TIMEZONE';") == "1" ]]; then
-    echo "Global time zone is set to $DATABASE_TIMEZONE."
-  else
-    echo "Global time zone is not set to $DATABASE_TIMEZONE. Exiting..."
     exit 1
   fi
   sudo mariadb -e "FLUSH PRIVILEGES;"

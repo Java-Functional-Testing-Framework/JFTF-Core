@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from sys import stdout
+from tzlocal import get_localzone_name
 from .jftf_configuration import jftfXMLConfigManager
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -161,7 +162,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = get_localzone_name()
 
 USE_I18N = True
 
