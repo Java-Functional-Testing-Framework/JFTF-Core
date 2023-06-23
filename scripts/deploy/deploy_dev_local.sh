@@ -12,7 +12,7 @@ DATABASE_NAME="jftf_cmdb"
 MOCK_DATABASE_NAME="test_jftf_cmdb"
 DATABASE_USER="jftf"
 DATABASE_PASSWORD="jftf_development"
-DATABASE_TIMEZONE="Europe/Bucharest"
+DATABASE_TIMEZONE="UTC"
 export DJANGO_SUPERUSER_USERNAME="jftf_dev"
 DJANGO_SUPERUSER_EMAIL="jftf_dev@jftf.com"
 export DJANGO_SUPERUSER_PASSWORD="jftf_dev"
@@ -119,8 +119,8 @@ function configure_rsyslog_remote_logging() {
     echo "rsyslog.conf not found"
     exit 1
   fi
-  sed -i 's/#module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf
-  sed -i 's/#input(type="imudp" port="514")/input(type="imudp" port="514")/' /etc/rsyslog.conf
+  sudo sed -i 's/#module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf
+  sudo sed -i 's/#input(type="imudp" port="514")/input(type="imudp" port="514")/' /etc/rsyslog.conf
 
   # shellcheck disable=SC2016
   if ! grep -q '$AllowedSender UDP, 127.0.0.1' /etc/rsyslog.conf; then
